@@ -347,4 +347,55 @@ data = dict(
         pipeline=test_pipeline))
 ```
 
-可以根据注释修改成自己想要的内容。
+根据注释，修改内容；保存成新的文件`pascal_voc_my.py`至`mmsegmentation/configs/_base_/datasets`下；
+
+### 4.3 修改模型Config配置文件
+
+Config文件是train.py直接调用的config文件，模型可以根据自己需要进行选择，模型的效果都在官方文档中有。以`pspnet`为例，我们修改`mmsegmentation/configs/pspnet/pspnet_r50-d8_769x769_40k_cityscapes.py`这个Config文件，变成符合我们的数据集；
+
+```bashrc
+_base_ = [
+    '../_base_/models/pspnet_r50-d8.py', #骨干模型路径
+    '../_base_/datasets/pascal_voc_my.py', #修改成刚刚写的Dataset config文件路径
+    '../_base_/default_runtime.py',  #这里保持不变，可以修改
+    '../_base_/schedules/schedule_40k.py' #这里保持不变，可以修改
+]
+model = dict(
+    decode_head=dict(align_corners=True),  #不变
+    auxiliary_head=dict(align_corners=True), #不变
+    test_cfg=dict(mode='slide', crop_size=(769, 769), stride=(513, 513))) #不变
+
+evaluation = dict(metric='mDice') #增加了验证方法，按照比赛的要求
+```
+
+进入`../_base_/models/pspnet_r50-d8.py·`修改，即`mmsegmentation/configs/_base_/models/pspnet_r50-d8.py`；
+如果是单GPU训练，则将`norm_cfg = dict(type='SyncBN', requires_grad=True)`修改成`norm_cfg = dict(type='BN', requires_grad=True)，如果使用了SyncBN却只有一块可用的GPU，那可能会报类似AssertionError:Default process group is not initialized的错误。
+
+然后修改`num_classes`，另`num_classes = 2`，分别位于24和37行，修改完成后保存；其他不需要改；
+
+### 4.4 可选配置修改
+
+`../_base_/default_runtime.py`修改：
+
+- 在`../_base_/default_runtime.py`中，可以选择修改`workflow`，[（'train'，1）]表示只有一个workflow，名为'train'的workflow执行一次。workflow按照总的时间段将模型分为若干个循环进行训练。这里可以改成`workflow = [('train', 1),('val', 1)]`;
+- `load_from = None`是预训练加载模型的路径；
+- `resume_from = None`是中断训练后，如果想继续训练，加载的模型路径；
+-  `interval=100` 是多少步以后输入一次loss
+
+`../_base_/schedule_40k.py`修改：
+
+```bashrc
+# optimizer
+optimizer = dict(type='AdamW', lr=0.001, weight_decay=0.0005) #优化器选择，学习速率
+optimizer_config = dict()
+# learning policy
+lr_config = dict(policy='poly', power=0.9, min_lr=1e-5, by_epoch=False) #学习速率衰减方法
+# runtime settings
+runner = dict(type='IterBasedRunner', max_iters=40000)  #多少步长
+checkpoint_config = dict(by_epoch=False, interval=1000) #多久保存一次模型
+evaluation = dict(interval=1000, metric='mIoU', pre_eval=True) #多久验证一次和验证方法
+```
+
+### 5.训练
+
+
