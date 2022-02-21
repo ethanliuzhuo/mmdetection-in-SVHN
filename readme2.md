@@ -396,6 +396,67 @@ checkpoint_config = dict(by_epoch=False, interval=1000) #多久保存一次模�
 evaluation = dict(interval=1000, metric='mIoU', pre_eval=True) #多久验证一次和验证方法
 ```
 
-### 5.训练
+## 5.训练
+
+如果需要预训练模型，去mmlab相应的网站下载，比如我配置了pspnet_r50-d8_769x769_40k_cityscapes的文件，就需要去[这里](https://github.com/open-mmlab/mmsegmentation/tree/master/configs/pspnet)下载相应的模型到`checkpoints`里。比如在`checkpoints`里使用`wget https://download.openmmlab.com/mmsegmentation/v0.5/pspnet/pspnet_r50-d8_769x769_40k_cityscapes/pspnet_r50-d8_769x769_40k_cityscapes_20200606_112725-86638686.pth`
+
+单显卡训练命令：
+
+`python tools/train.py configs/pspnet/pspnet_r50-d8_769x769_40k_cityscapes.py --work-dir house --load-from checkpoints/pspnet_r50-d8_769x769_40k_cityscapes_20200606_112725-86638686.pth`
+
+- `train.py` 为训练命令；
+- `configs/pspnet/pspnet_r50-d8_769x769_40k_cityscapes.py`为配置文件路径；
+- `--work-dir`为模型保存路径，没有会自动生成；
+- `--load-from`为预训练模型路径；
+
+多显卡训练命令:
+
+`./tools/dist_train.sh ${CONFIG_FILE} ${GPU_NUM}`
+如：`./tools/dist_train.sh configs/pspnet/pspnet_r50-d8_769x769_40k_cityscapes.py 2 --work-dir house --load-from checkpoints/pspnet_r50-d8_512x512_20k_voc12aug_20200617_101958-ed5dfbd9.pth`
+
+在配置文件路径后面加入GPU 数量即可。
+
+## 6.预测
+
+使用两个V100训练400000步大概需要一天半的时间，大约23个epoch。mDice在验证集的值为0.9371。
+
+在预测前，需要将`test_a`的图片复制到`images`，即`cp data/house/test_a/* data/house/images`，否则路径不对；
+
+预测命令： `python tools/test.py configs/pspnet/pspnet_r50-d8_769x769_40k_cityscapes.py house/latest.pth --out data/house/result.pkl --show-dir data/house/perdict`
+
+- `configs`为配置文件；
+- `house/latest.pth`为模型路径；
+- `--out` 输出结果文件路径；
+- `--show-dir` 输出结果图片路径，记得提前生成空的文件夹；
+
+输出csv结果
+```bashrc
+import pickle
+f = open('house2/result.pkl','rb') #结果保存路径
+data = pickle.load(f)
+
+mask = []
+name = []
+for i,image in enumerate(data):
+    rle = rle_encode(image.astype('uint8')) #这个函数之前有，转为rle格式
+    mask += [rle]
+    
+df = pd.DataFrame()
+test_mask = pd.read_csv('data/house/test_a_samplesubmit.csv',sep='\t',names = ['name','mask']) #读取样本数据
+
+name = test_mask['name'] 
+
+df['name'] = name
+mask_all = ['' for i in range(len(df))]
+
+for i in range(len(mask)):
+    ind  = df[df.name==filename_list[i]+ '.jpg'].index[0]
+    mask_all[ind] = mask[i]
+df['mask'] = mask_all
+
+df.to_csv('data/house2/test_b.csv',encoding='utf-8',header = None,index=False,sep = '\t') #输出结果
+```
+
+最后提交，完成
 
 
