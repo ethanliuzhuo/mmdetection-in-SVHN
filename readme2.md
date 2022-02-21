@@ -43,7 +43,7 @@ pip install -e .  # 或者 "python setup.py develop",别漏了最后一个点
 
 下载编译过程较慢，至此mmsegmentation配置完成
 
-## 1.2.测试
+## 1.1. 测试
 ```bashrc
 import torch, torchvision
 import mmseg
@@ -167,6 +167,7 @@ for file in tqdm(mmcv.scandir(osp.join(data_root, ann_dir), suffix='.txt')):
       seg_img.putpalette(np.array(palette, dtype=np.uint8))
       seg_img.save(osp.join(data_root, ann_dir, file.replace('.txt','.png')))
 ```
+<img src="https://github.com/ethanliuzhuo/mmdetection-in-SVHN/blob/master/img/%E4%B8%8B%E8%BD%BD%20(1).png" width="400px">
 
 测试图片，有输出即可；
 
@@ -231,9 +232,9 @@ with open(osp.join(data_root, split_dir, 'test.txt'), 'w') as f:
                             └── WTNVWP6BSA.jpg
 ```
 
-## 4.修改配置
+## 4. 修改配置
 
-### 4.1修改 Dataset Classes 数据配置模型
+### 4.1. 修改 Dataset Classes 数据配置模型
 
 在`mmsegmentation/mmseg/datasets`，这里保存了数种不同的数据集格式；现在我们以VOC的数据集格式为例，创建一个新的Dataset Class；
 ```bashrc
@@ -281,7 +282,7 @@ __all__ = [
 ]
 ```
 
-### 4.2 修改 Dataset Config 数据配置文件
+### 4.2. 修改 Dataset Config 数据配置文件
 在`mmsegmentation/configs/_base_/datasets` 中，创建一个新文件或者修改`pascal_voc12.py` 中的内容；
 
 以`pascal_voc12.py`为模板，我们修改成：
@@ -349,7 +350,9 @@ data = dict(
 
 根据注释，修改内容；保存成新的文件`pascal_voc_my.py`至`mmsegmentation/configs/_base_/datasets`下；
 
-### 4.3 修改模型Config配置文件
+注意！因为修改原始配置，所以需要执行`python setup.py develop`重新编译一次；
+
+### 4.3. 修改模型Config配置文件
 
 Config文件是train.py直接调用的config文件，模型可以根据自己需要进行选择，模型的效果都在官方文档中有。以`pspnet`为例，我们修改`mmsegmentation/configs/pspnet/pspnet_r50-d8_769x769_40k_cityscapes.py`这个Config文件，变成符合我们的数据集；
 
@@ -373,7 +376,7 @@ evaluation = dict(metric='mDice') #增加了验证方法，按照比赛的要求
 
 然后修改`num_classes`，另`num_classes = 2`，分别位于24和37行，修改完成后保存；其他不需要改；
 
-### 4.4 可选配置修改
+### 4.4. 可选配置修改
 
 `../_base_/default_runtime.py`修改：
 
@@ -396,7 +399,7 @@ checkpoint_config = dict(by_epoch=False, interval=1000) #多久保存一次模�
 evaluation = dict(interval=1000, metric='mIoU', pre_eval=True) #多久验证一次和验证方法
 ```
 
-## 5.训练
+## 5. 训练
 
 如果需要预训练模型，去mmlab相应的网站下载，比如我配置了pspnet_r50-d8_769x769_40k_cityscapes的文件，就需要去[这里](https://github.com/open-mmlab/mmsegmentation/tree/master/configs/pspnet)下载相应的模型到`checkpoints`里。比如在`checkpoints`里使用`wget https://download.openmmlab.com/mmsegmentation/v0.5/pspnet/pspnet_r50-d8_769x769_40k_cityscapes/pspnet_r50-d8_769x769_40k_cityscapes_20200606_112725-86638686.pth`
 
@@ -416,7 +419,7 @@ evaluation = dict(interval=1000, metric='mIoU', pre_eval=True) #多久验证一�
 
 在配置文件路径后面加入GPU 数量即可。
 
-## 6.预测
+## 6. 预测
 
 使用两个V100训练400000步大概需要一天半的时间，大约23个epoch。mDice在验证集的值为0.9371。
 
