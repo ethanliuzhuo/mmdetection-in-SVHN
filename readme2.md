@@ -1,4 +1,4 @@
-# mmsegmentation-in-Inria_Aerial_Image_Labeling(地表建筑物识别)
+# mmsegmentation-in-IAIL(地表建筑物识别)
 
 # 使用mmsegmentation(v0.21.1版本)进行地表建筑物识别
 
