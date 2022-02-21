@@ -11,8 +11,8 @@
 
 拆分的图片和比赛题目在天池的[官网](https://tianchi.aliyun.com/competition/entrance/531872/introduction)已经详细阐述，这里不再赘述；
 
-## 1.安装使用mmsegmentation
-在这里，因为mmsegmentation只官方适配于Linux河MacOS操作系统，对Windows（7、10）并不官方支持，如果需要在Windows系统配置mmdetection，可参考[这里](https://www.bilibili.com/video/av795876868/)，下面配置在Ubuntu18.04进行。
+## 1. 安装使用mmsegmentation
+在这里，因为mmsegmentation只官方适配于Linux和MacOS操作系统，对Windows（7、10）并不官方支持，如果需要在Windows系统配置mmdetection，可参考[这里](https://www.bilibili.com/video/av795876868/)，下面配置在Ubuntu18.04进行。
 
 在进入官网安装教程前，首先需要安装CUDA，Cudnn, 具体教程在[这里](https://blog.csdn.net/qq_32408773/article/details/84112166)可以找到。安装完毕后，安装[Anaconda](https://www.anaconda.com/)，用于建立虚拟环境。
 
