@@ -417,6 +417,8 @@ evaluation = dict(interval=1000, metric='mIoU', pre_eval=True) #多久验证一�
 `./tools/dist_train.sh ${CONFIG_FILE} ${GPU_NUM}`
 如：`./tools/dist_train.sh configs/pspnet/pspnet_r50-d8_769x769_40k_cityscapes.py 2 --work-dir house --load-from checkpoints/pspnet_r50-d8_512x512_20k_voc12aug_20200617_101958-ed5dfbd9.pth`
 
+如果遇到`RuntimeError: Address already in use`错误，在`dist_train.sh`中修改`PORT=${PORT:-29509}`的数字，任意一组以前没有用过的数字都可以。
+
 在配置文件路径后面加入GPU 数量即可。
 
 ## 6. 预测
