@@ -350,7 +350,7 @@ data = dict(
 
 根据注释，修改内容；保存成新的文件`pascal_voc_my.py`至`mmsegmentation/configs/_base_/datasets`下；
 
-注意！因为修改原始配置，所以需要执行`python setup.py develop`重新编译一次；
+注意！因为修改原始配置，所以需要执行`python setup.py develop`或者`python setup.py install`重新编译一次；
 
 ### 4.3. 修改模型Config配置文件
 
