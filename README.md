@@ -400,6 +400,13 @@ df.to_csv('answer_020.csv',encoding = 'utf-8',index=False)
 
 最后提交，完成
 
+## 错误提示
+
+-  `AssertionError: The 'num_classes' (10) in Shared2FCBBoxHead of MMDataParallel does not matches the length of 'CLASSES' 80) in RepeatDataset` 错误原因：数据集的类别信息仍是coco类别80类，(我的数据集是10类)。在修改完 class_names.py 和 voc.py 之后要重新编译： `python setup.py install`；
+-  `AssertionError: 'CLASSES' in ConcatDatasetshould be a tuple of str.Add comma if number of classes is 1 as CLASSES = (0,)` 错误原因：修改num_classes成自己的类别数，如果是一个类别，漏了逗号，需要写成CLASSES = (person,)，否则会出现错误；
+-  `AttributeError: 'ConfigDict' object has no attribute 'pipeline'` 错误原因：这是官方文件中的bug, 是因为pascal_voc下这几个配置文件都调用了.\configs\_base_\voc0712.py, 而错误就发生在 .\configs\_base_\voc0712.py, 标红的那一块(左图35,36,37行, 其实就是把这三行删掉), 改成右图。
+
+
 
 
 
