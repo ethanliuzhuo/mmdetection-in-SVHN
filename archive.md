@@ -7,8 +7,25 @@ Kaggle [Military Aircraft Detection Dataset](https://www.kaggle.com/datasets/a20
 - VOC数据集格式 (xmin, ymin, xmax, ymax)
 - 36 种飞机型号
 ('F15','F18','Mirage2000','US2','JAS39','RQ4','EF2000','C5','A400M','SR71','B1','C130','AG600','F14','C17','F35','B52','Su57','U2','Tu160','F22','B2','A10','F4','YF23','J20','F117','E2','XB70','Tu95','F16','V22','Rafale','MQ9','Mig31','Be200')
+
+目录：
+- 安装mmdetection
+    - （不推荐）[官方方法](#jump1)
+    - （推荐） [Docker方法](#jump2)
+- [转化格式](#jump3)
+- 修改配置
+    - [性能版](#jump4)
+    - (新手推荐)[简易版](#jump5)
+- [训练](#jump6)
+- [测试](#jump7)
+- [错误提示](#jump8)
+    
+   
+<span id="jump1"></span>
 ## 1.安装使用mmdetection
-### 1.1测试
+
+## 方法1：（不推荐）官方教程
+### 1.1安装
 在这里，因为mmdetection只官方适配于Linux河MacOS操作系统，对Windows（7、10）并不官方支持，如果需要在Windows系统配置mmdetection，可参考[这里](https://www.bilibili.com/video/av795876868/)，下面配置在Ubuntu18.04进行。
 
 在进入官网安装教程前，首先需要安装CUDA10.2，CUdnn7.6.X, 具体教程在[这里](https://blog.csdn.net/qq_32408773/article/details/84112166)可以找到。安装完毕后，安装[Anaconda](https://www.anaconda.com/)，用于建立虚拟环境。
@@ -27,7 +44,7 @@ conda activate open-mmlab
 conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
 
 #安装mmcv，是一个mmdet的基础包
-pip install mmcv-full==1.3.9 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.10.0/index.html
+pip install mmcv-full==1.4.8 -f https://download.openmmlab.com/mmcv/dist/cu102/torch1.10.0/index.html
 
 #或者直接运行
 pip install mmcv-full
@@ -55,8 +72,36 @@ python demo/image_demo.py demo/demo.jpg configs/faster_rcnn/faster_rcnn_r50_fpn_
 
 然后就会输出图片，由此表示mmdetection配置完成
 
+<span id="jump2"></span>
+## （推荐）方法2：Docker
 
+如果熟悉Docker，可使用Docker创建，这样可以省去配置的麻烦。流程如下：
+
+1. 在`239`服务器路径`/home/xxxx/Docker_images`路径下有一个`mmlab.tar`的压缩包，该压缩包为docker image文件，进入该文件夹；
+
+2. 使用命令`docker import - {yourname} <  mmlab.tar`，创建一个新的docker image。其中yourname填写image名字，最好不要与前面的名字重复，如 `docker import - mmlabtest <  mmlab.tar`；
+
+3. 第二步过程有点久，请耐心等待。有一串sha256:xxxxx的输出代表导入成功；
+
+4. 输入`docker image ls`，查看IMGAE ID，复制记录下来；
+
+5. 输入`docker run --name {your_container_name}  -p 88:66 -tdi --shm-size 64G --gpus all -v /home/xxx/xxx/:/home {IMGAE ID} /bin/bash`，生成Container。其中:
+    - `--name`代表Container的名称,可自定义名字；
+    - `-p 88:66`代表服务器端口映射至Docker端口（只要不和以前的Container端口冲突都可以自选）；
+    - `--shm-size`代表共享内存，非常重要；
+    - `-v` 代表本地服务器文件夹映射到Docker的文件夹，以后所有文件都会保存在这里 ，冒号前本地服务器路径，必须为绝对路径，冒号后Container挂载的路径，如`home/root/myname/:/home`
+    - `{IMGAE ID}`输入第四步得到的ID； /bin/bash必填，启动项；
+6. (可选) 输入`docker ps`，查询生成的`Container ID`;
+7. 进入Docker,`docker exec -it {your_container_name} bash` 或者`docker exec -it {your_container_ID} bash`；
+8.  进入主文件夹`cd home`，下载mmdetection文件夹`git clone https://github.com/open-mmlab/mmdetection.git`，然后`cd mmdetection`。执行编译程序`python setup.py install`；
+9. `Finished processing dependencies for mmdet==2.22.0`代表编译成功；
+10. 安装[官网](https://mmdetection.readthedocs.io/en/v2.21.0/get_started.html) 方法验证一次即可。有输出就行。
+
+11. (参考)`docker image rm a780a9281059`删除image
+12. 
+<span id="jump3"></span>
 ## 2.转化格式
+
 将数据集下载解压后我们得到`annotated`、`crop`和`dataset`文件夹。其中只有`dataset`文件夹中的数据集有用。
 
 文件解释如下：
@@ -308,7 +353,7 @@ draw_single_image(ann_path,pic_path,save_path=None)
 <img src="https://github.com/ethanliuzhuo/mmdetection-in-SVHN/blob/master/img/111.png" width="700px">
 
 
-
+<span id="jump4"></span>
 ## 3.修改配置
 
 ### 3.1 修改数据读取配置文件
@@ -320,6 +365,8 @@ draw_single_image(ann_path,pic_path,save_path=None)
 
 修改过后内容如下：
 `/mmdetection/configs/_base_/datasets/mydata.py`
+
+<span id="jump"></span>
 ```python
 # dataset settings
 dataset_type = 'VOCDataset'
@@ -426,7 +473,7 @@ def voc_classes():
 
 将第一行的` ../_base_/datasets/mask_rcnn_r50_fpn.py`更改为` ../_base_/datasets/cascade_rcnn_r50_fpn.py`，我们不需要mask，因此换了一个主模型
 
-将第二行的` ../_base_/datasets/coco_detection.py`更改为` ../_base_/datasets/voc0712.py`，从COCO数据集更改为VOC数据集格式
+将第二行的` ../_base_/datasets/coco_detection.py`更改为` ../_base_/datasets/mydata.py`，从COCO数据集更改为VOC数据集格式
 
 ```python
 _base_ = [
@@ -503,7 +550,21 @@ optimizer = dict(
 lr_config = dict(warmup_iters=1000, step=[27, 33]) #第27、33轮衰减学习速率
 runner = dict(max_epochs=36) #36轮
 ```
+<span id="jump5"></span>
+## （简易版）使用cascade_rcnn配置预测。
+如果swin transformer的教程太难，我们可以使用cascade_rcnn来进行简单的预测。
 
+参考`configs/cascade_rcnn/cascade_rcnn_r50_fpn_1x_coco.py`, 里面有四个文件路径，我们分别修改这四个文件：
+
+1. `../_base_/models/cascade_rcnn_r50_fpn.py`中，找到`num_classes`，将其所有数字变成36，一共三处，并保存；
+
+2. `../_base_/datasets/coco_detection.py`中，把`coco_detection`变成`voc0712.py`，从COCO数据集更改为VOC数据集格式,`voc0712.py`的内容在[3.1.1](#jump)中，并保存；
+
+3. `../_base_/schedules/schedule_1x.py`，把学习速率`lr = 0.0001`该小即可，并保存；
+
+4. `../_base_/default_runtime.py`中`load_from`替换成预训练模型路径。点击[这里](https://download.openmmlab.com/mmdetection/v2.0/cascade_rcnn/cascade_rcnn_r50_caffe_fpn_1x_coco/cascade_rcnn_r50_caffe_fpn_1x_coco_bbox_mAP-0.404_20200504_174853-b857be87.pth)下载预训练并保存到checkpoints里，复制路径到`load_from`并保存。
+
+<span id="jump6"></span>
 ## 4.训练
 
 单显卡训练命令：
@@ -519,6 +580,7 @@ runner = dict(max_epochs=36) #36轮
 
 各参数依次是：训练脚本名，配置文件，GPU数量，模型和日志保存路径（没有会自己创建）
 
+<span id="jump7"></span>
 ## 5.预测图片
 
 经过36轮训练，数据可以达到mAP至0.77+，对于该数据集已经足够。
@@ -565,9 +627,6 @@ out_file = '/data/archive/test.jpg'
 imgs = model.show_result(img, result,score_thr =0.7)
 cv2.imwrite(out_file, imgs)
 ```
-
-<img src="https://github.com/ethanliuzhuo/mmdetection-in-SVHN/blob/master/img/output.png" width="500px">
-
 
 ### 5.3  视频预测
 
@@ -623,10 +682,7 @@ def show_video(video_path:str,small:int=2):
             video.release()
 show_video('/home/mmdetection/data/archive/video/ag600_1.mp4')
 ```
-
-<img src="https://github.com/ethanliuzhuo/mmdetection-in-SVHN/blob/master/img/f22_2.gif" width="400px">
-
-
+<span id="jump8"></span>
 ## 错误提示
 
 -  `AssertionError: The 'num_classes' (10) in Shared2FCBBoxHead of MMDataParallel does not matches the length of 'CLASSES' 80) in RepeatDataset` 错误原因：数据集的类别信息仍是coco类别80类，(我的数据集是10类)。在修改完 class_names.py 和 voc.py 之后要重新编译： `python setup.py install`；
