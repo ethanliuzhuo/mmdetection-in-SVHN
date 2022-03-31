@@ -8,7 +8,7 @@ Kaggle [Military Aircraft Detection Dataset](https://www.kaggle.com/datasets/a20
 - 36 种飞机型号
 ('F15','F18','Mirage2000','US2','JAS39','RQ4','EF2000','C5','A400M','SR71','B1','C130','AG600','F14','C17','F35','B52','Su57','U2','Tu160','F22','B2','A10','F4','YF23','J20','F117','E2','XB70','Tu95','F16','V22','Rafale','MQ9','Mig31','Be200')
 
-目录：
+## 目录：
 - 安装mmdetection
     - （不推荐）[官方方法](#jump1)
     - （推荐） [Docker方法](#jump2)
@@ -98,7 +98,8 @@ python demo/image_demo.py demo/demo.jpg configs/faster_rcnn/faster_rcnn_r50_fpn_
 10. 安装[官网](https://mmdetection.readthedocs.io/en/v2.21.0/get_started.html) 方法验证一次即可。有输出就行。
 
 11. (参考)`docker image rm a780a9281059`删除image
-12. 
+
+
 <span id="jump3"></span>
 ## 2.转化格式
 
