@@ -628,6 +628,7 @@ out_file = '/data/archive/test.jpg'
 imgs = model.show_result(img, result,score_thr =0.7)
 cv2.imwrite(out_file, imgs)
 ```
+<img src="https://github.com/ethanliuzhuo/mmdetection-in-SVHN/blob/master/img/output.png" width="500px">
 
 ### 5.3  视频预测
 
@@ -683,6 +684,9 @@ def show_video(video_path:str,small:int=2):
             video.release()
 show_video('/home/mmdetection/data/archive/video/ag600_1.mp4')
 ```
+
+<img src="https://github.com/ethanliuzhuo/mmdetection-in-SVHN/blob/master/img/f22_2.gif" width="400px">
+
 <span id="jump8"></span>
 ## 错误提示
 
