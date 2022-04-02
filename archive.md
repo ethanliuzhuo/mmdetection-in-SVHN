@@ -720,7 +720,7 @@ file_obj.close()
 
 其中`--show-dir`: 如果指明，检测结果将会被绘制在图像上并保存到指定目录。它只适用于单 GPU 的测试，是用于调试和可视化的。即使你的环境中没有 GUI，这个选项也可使用。开启以后速度较慢。
 
-<img src="https://github.com/ethanliuzhuo/mmdetection-in-SVHN/blob/master/img/123.png" width="500px">
+<img src="https://github.com/ethanliuzhuo/mmdetection-in-SVHN/blob/master/img/123.png" width="800px">
 
 
 
