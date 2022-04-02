@@ -613,7 +613,9 @@ runner = dict(max_epochs=36) #36轮
 多显卡训练命令:
 
 `./tools/dist_train.sh ${CONFIG_FILE} ${GPU_NUM}`
-如：`./tools/dist_train.sh  ./configs/swin/mask_rcnn_swin-t-p4-w7_fpn_ms-crop-3x_coco.py 4 --work-dir archive`
+如：
+
+`./tools/dist_train.sh  ./configs/swin/mask_rcnn_swin-t-p4-w7_fpn_ms-crop-3x_coco.py 4 --work-dir archive`
 
 各参数依次是：训练脚本名，配置文件，GPU数量，模型和日志保存路径（没有会自己创建）
 
@@ -626,13 +628,101 @@ runner = dict(max_epochs=36) #36轮
 <span id="jump7.1"></span>
 
 ### 5.1  大规模图片预测
-如果是测试验证集的图片，可以使用`tool/test.py`预测，
+如果是测试验证集的图片，可以使用`tools/test.py`预测，
 
-在预测前，需要将`验证集`的图片复制到`data/VOCdevkit/VOC2007/JPEGImages`中，并注意已经生成了好了txt格式
+在预测前，需要将`验证集`的图片复制到`data/VOCdevkit/VOC2007/JPEGImages`中，并注意已经生成了好了txt格式。
 
 测试命令`python tools/test.py configs/swin/mask_rcnn_swin-t-p4-w7_fpn_ms-crop-3x_coco.py archive/latest.pth  --out archive/result.pkl --show-dir archive --show-score-thr 0.5`
 
 各参数依次是：测试脚本名，配置文件路径，模型路径，输出结果路径（BOX和概率信息），测试框好的图片保存路径，置信度（可选，不选默认0.3）
+
+#### 请注意！！！
+
+如果你有一个待检测的图片文件夹，里面有数百张图片，它并不是验证集而是测试集，没有标注信息。如果直接使用上面的命令是不能进行推理图片的。可能会出现`FileNotFoundError: VOCDataset: [Errno 2] No such file or directory: 'data/ship/VOC2007/Annotations/23695.xml'`等情况。必须在`Annotations`文件夹下面有对应的标注信息，以及重新划分训练集。
+
+你可能会好奇，测试集怎么做标注信息？其实用`tools/test.py`时并不需要每个物体的标注框，他只需要文件的路径即可。因此我们可以给测试集图片每张图构造一个xml文件，然后修改测试集的集合`test.txt`。
+
+脚本如下：
+```python
+root = '/home/mmdetection/data/ship/VOC2007/' #注意路径
+img_dir = '/home/mmdetection/data/ship/VOC2007/JPEGImages/' #注意这里指需要测试的路径，先全部移过来
+ann_dir = '/home/mmdetection/data/ship/VOC2007/Annotations/' #注意这里是标注信息路径，都保存在这里
+
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Feb 28 09:46:35 2022
+
+@author: liuzhuo
+"""
+import pandas as pd
+import numpy as np
+import os
+from rich.progress import track
+
+'''人为构造xml文件的格式'''
+out0 ='''<annotation>
+    <folder>%(folder)s</folder>
+    <filename>%(name)s</filename>
+    <path>%(path)s</path>
+    <source>
+        <database>None</database>
+    </source>
+    <size>
+        <width>%(width)d</width>
+        <height>%(height)d</height>
+        <depth>3</depth>
+    </size>
+    <segmented>0</segmented>
+'''
+
+out2 = '''</annotation>
+'''
+
+
+images_test_lists = os.listdir(img_dir)
+print(len(images_test_lists))
+for image_xml in track(images_test_lists):
+
+    img_path = os.path.join(img_dir,image_xml)
+    xml_path = img_path.replace('.jpg','.xml')
+    xml_path = xml_path.replace('JPEGImages','Annotations')
+    
+    source = {}
+    source['name'] = image_xml     
+    source['path'] = img_path 
+    source['folder'] = 'VOC2007' #固定格式
+    
+    source['width'] = 256 #图片宽
+    source['height'] = 256 #图片高
+
+    fxml = open(xml_path, 'w') #在同一个文件夹下创建文件
+    fxml.write(out0 % source) #写入
+    fxml.write(out2) #写入
+    fxml.close()
+
+"""测试集文件生成"""
+file_obj = open("VOC2007/ImageSets/Main/test.txt", 'w', encoding='utf-8') #注意路径
+
+for i in images_test_lists:
+    k = str(i.split('.')[0])
+    file_obj.writelines(k)
+    file_obj.write('\n')
+file_obj.close()
+```
+
+还有最后一步，因为在`mmdetection/configs/_base_/datasets/mydata.py`的数据配置文件中的`test`的`ann_file`路径依然是验证集的路径，在第84行左右，需要将其改成`ann_file=data_root + 'VOC2007/ImageSets/Main/test.txt',`,然后保存。
+
+然后就可以运行单GPU预测：
+`python tools/test.py ship3/111.py ship3/latest.pth --out ship3/result.pkl --show-dir ship3`
+
+或者多GPU预测：
+`./tools/dist_test.sh ship3/111.py ship3/latest.pth 4 --out ship3/result.pkl`
+
+其中`--show-dir`: 如果指明，检测结果将会被绘制在图像上并保存到指定目录。它只适用于单 GPU 的测试，是用于调试和可视化的。即使你的环境中没有 GUI，这个选项也可使用。开启以后速度较慢。
+
+<img src="https://github.com/ethanliuzhuo/mmdetection-in-SVHN/blob/master/img/123.png" width="500px">
+
+
 
 <span id="jump7.2"></span>
 
@@ -737,3 +827,4 @@ show_video('/home/mmdetection/data/archive/video/ag600_1.mp4')
 -  `AssertionError: 'CLASSES' in ConcatDatasetshould be a tuple of str.Add comma if number of classes is 1 as CLASSES = (0,)` 错误原因：修改num_classes成自己的类别数，如果是一个类别，漏了逗号，需要写成CLASSES = (person,)，否则会出现错误；
 -  `AttributeError: 'ConfigDict' object has no attribute 'pipeline'` 错误原因：这是官方文件中的bug, 是因为pascal_voc下这几个配置文件都调用了.\configs\_base_\voc0712.py, 而错误就发生在 .\configs\_base_\voc0712.py, 标红的那一块(左图35,36,37行, 其实就是把这三行删掉), 改成右图。
 -  `FileNotFoundError: [Errno 2] No such file or directory: '*.png' `错误原因：`mmdetection/mmdet/datasets/xml_style.py`中的51行图片格式不对，改成相应的图片格式;
+- `FileNotFoundError: VOCDataset: [Errno 2] No such file or directory: 'data/archive/VOC2007/Annotations/0a8e123f917b737d3156a2e8a6537655.xml'` 错误原因：使用`tools/test.py`，但文件夹`Annotations`没有和图片对于的标注信息。解决办法请查看[5.1的注意事项](#jump7.1)；
