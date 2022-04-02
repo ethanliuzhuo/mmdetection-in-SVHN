@@ -820,6 +820,36 @@ show_video('/home/mmdetection/data/archive/video/ag600_1.mp4')
 
 <img src="https://github.com/ethanliuzhuo/mmdetection-in-SVHN/blob/master/img/f22_2.gif" width="400px">
 
+<span id="jump7.4"></span>
+
+下面脚本是为了拆解视频到帧的，可以和[5.1 大规模图片预测](#jump7.1)配合使用, 生成图片保存在单一文件夹，再用多GPU进行预测，只保留BOX信息而不生成视频的话速度会快很多。
+```python
+import os
+import time
+import datetime
+import requests
+from concurrent.futures import ThreadPoolExecutor
+
+import pandas as pd
+import cv2
+import mmcv
+from mmdet.apis import inference_detector, init_detector
+
+video = '/home/mmdetection/data/archive/video/TU160.mp4' #视频路径
+video_name = video.split('/')[-1] #视频名
+
+print(video)
+video_reader = mmcv.VideoReader(video)
+video_writer = None
+for num,frame in enumerate(mmcv.track_iter_progress(video_reader)):
+    video_names = video_name + '_' + str(num) +'.jpg'
+    path = '/home/mmdetection/data/archive/video_img'
+    if not os.path.exists(path):
+        os.makedirs(path)
+    filepahe = path + '/' + video_names
+    cv2.imwrite(filepahe, frame)
+```
+
 <span id="jump8"></span>
 ## 错误提示
 
