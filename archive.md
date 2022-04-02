@@ -31,6 +31,7 @@ Kaggle [Military Aircraft Detection Dataset](https://www.kaggle.com/datasets/a20
     - [大规模图片预测](#jump7.1)
     - [单图片预测](#jump7.2)
     - [视频预测](#jump7.3)
+        - [视频帧提取](#jump7.4)
 6. [错误提示](#jump8)
     
    
@@ -825,11 +826,6 @@ show_video('/home/mmdetection/data/archive/video/ag600_1.mp4')
 下面脚本是为了拆解视频到帧的，可以和[5.1 大规模图片预测](#jump7.1)配合使用, 生成图片保存在单一文件夹，再用多GPU进行预测，只保留BOX信息而不生成视频的话速度会快很多。
 ```python
 import os
-import time
-import datetime
-import requests
-from concurrent.futures import ThreadPoolExecutor
-
 import pandas as pd
 import cv2
 import mmcv
