@@ -9,22 +9,38 @@ Kaggle [Military Aircraft Detection Dataset](https://www.kaggle.com/datasets/a20
 ('F15','F18','Mirage2000','US2','JAS39','RQ4','EF2000','C5','A400M','SR71','B1','C130','AG600','F14','C17','F35','B52','Su57','U2','Tu160','F22','B2','A10','F4','YF23','J20','F117','E2','XB70','Tu95','F16','V22','Rafale','MQ9','Mig31','Be200')
 
 ## 目录：
-- 安装mmdetection
+1. 安装mmdetection
     - （不推荐）[官方方法](#jump1)
+        - [安装](#jump1.1)
+        - [测试](#jump1.2)
     - （推荐） [Docker方法](#jump2)
-- [转化格式](#jump3)
-- 修改配置
+2. [转化格式](#jump3)
+    - [构建xml标注文件](#jump3.1)
+    - [划分训练集](#jump3.2)
+    - [可视化测试](#jump3.3)
+3. 修改配置
     - [性能版](#jump4)
+        - [修改数据读取配置文件](#jump4.1)
+        - [修改模型配置文件](#jump4.2)
+        - [修改类别数量](#jump4.3)
+        - [加载预训练模型](#jump4.4)
+        - [修改学习策略](#jump4.5)
     - (新手推荐)[简易版](#jump5)
-- [训练](#jump6)
-- [测试](#jump7)
-- [错误提示](#jump8)
+4. [训练](#jump6)
+5. [测试](#jump7)
+    - [大规模图片预测](#jump7.1)
+    - [单图片预测](#jump7.2)
+    - [视频预测](#jump7.3)
+6. [错误提示](#jump8)
     
    
 <span id="jump1"></span>
 ## 1.安装使用mmdetection
 
 ## 方法1：（不推荐）官方教程
+
+<span id="jump1.1"></span>
+
 ### 1.1安装
 在这里，因为mmdetection只官方适配于Linux河MacOS操作系统，对Windows（7、10）并不官方支持，如果需要在Windows系统配置mmdetection，可参考[这里](https://www.bilibili.com/video/av795876868/)，下面配置在Ubuntu18.04进行。
 
@@ -59,6 +75,8 @@ pip install -v -e . #别漏了最后一个点
 ```
 
 下载编译过程较慢，至此mmdetection配置完成
+
+<span id="jump1.2"></span>
 
 ### 1.2测试
 先去mmdetection的[model zoo/faster_rcnn](https://github.com/open-mmlab/mmdetection/tree/master/configs/faster_rcnn)里下载faster_rcnn_r50_fpn的模型，放入 `./checkpoints `中，然后cd 至mmdetection
@@ -116,6 +134,9 @@ python demo/image_demo.py demo/demo.jpg configs/faster_rcnn/faster_rcnn_r50_fpn_
     └── ffca28378a5df5113d498f59ed282a98.jpg #图片
 ```
 
+<span id="jump3.1"></span>
+
+### 2.1 构建xml标注文件
 为了方便使用mmdetection进行训练、预测，我们需要将数据集的文件夹整理成VOC的文件夹的目录形式。
 
 PASCAL VOC挑战赛 （The PASCAL Visual Object Classes ）是一个世界级的计算机视觉挑战赛, PASCAL全称：Pattern Analysis, Statical Modeling and Computational Learning，是一个由欧盟资助的网络组织。
@@ -228,6 +249,10 @@ for csv in track(csv_list):
 print('---------------Done!!!--------------')            
 ```
 
+<span id="jump3.2"></span>
+
+### 2.2 划分训练集
+
 生成的xml文件现在依然在`dataset`中，现在将照片和标注转移至VOC文件夹中。在该目录下，使用命令`cp -r dataset/*.xml VOC2007/Annotations/`转移标注文件和命令`cp -r dataset/*.jpg VOC2007/JPEGImages/`。
 
 在`VOC2007/ImageSets/Main`下，划分训练集和测试集，生成`train.txt`,`val.txt`,代码如下：
@@ -300,10 +325,13 @@ file_obj2.close()
                      ├── train.txt 
                      └── val.txt
 ```
+<span id="jump3.3"></span>
+
+### 2.3 可视化（单张图片根据xml标注信息画框）
 
 请检查文件夹是否如上，以及Annotations和JPEGImages的数量是否相等。
 
-下面为了检查xml标注是否成功，用一个脚本进行可视化检查：
+下面为了检查xml标注是否成功，用一个脚本进行可视化检查（根据注释修改字体大小）：
 ```python
 import cv2
 import matplotlib.pyplot as plt # plt 用于显示图片
@@ -356,6 +384,8 @@ draw_single_image(ann_path,pic_path,save_path=None)
 
 <span id="jump4"></span>
 ## 3.修改配置
+
+<span id="jump4.1"></span>
 
 ### 3.1 修改数据读取配置文件
 #### 3.1.1 修改dataset配置文件
@@ -464,7 +494,7 @@ def voc_classes():
     
 ```
 
-
+<span id="jump4.2"></span>
 
 ### 3.2 修改模型配置文件
 
@@ -490,6 +520,8 @@ _base_ = [
 - 第36行把`with_mask=True`改成`with_mask=False`
 - 第73行把`keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks'])`中的`'gt_masks'`删掉
 
+<span id="jump4.3"></span>
+
 ### 3.3 修改类别数量
 修改` ../_base_/datasets/cascade_rcnn_r50_fpn.py`
 
@@ -498,6 +530,8 @@ _base_ = [
 注意：类别有多少类为多少类，背景不计入类别
 
 （非常重要）最后，因为修改了类别，需要重新编译，覆盖以前的链接路径，`python setup.py install`。
+
+<span id="jump4.4"></span>
 
 ### 3.4 加载预训练模型
 
@@ -527,6 +561,8 @@ workflow = [('train', 1),('val', 1)] #当前工作区名称
 去mmdetection [model zoo](https://github.com/open-mmlab/mmdetection/tree/master/configs/swin)下载`mask_rcnn_swin-t-p4-w7_fpn_ms-crop-3x_coco_20210906_131725-bacf6f7b.pth`，保存至`checkpoints`文件夹中，将路径复制到`load_from`，顶替None。这样就可以预训练模型配置。不如不需要预训练模型，则用None代替。
 
 `resume_from`表示如果训练中断，恢复上次保存的模型的路径，继续训练。
+
+<span id="jump4.5"></span>
 
 ### 3.5 修改学习策略
 修改：`../configs/_base_/schedules/schedule_1x.py`
@@ -582,9 +618,12 @@ runner = dict(max_epochs=36) #36轮
 各参数依次是：训练脚本名，配置文件，GPU数量，模型和日志保存路径（没有会自己创建）
 
 <span id="jump7"></span>
-## 5.预测图片
+
+## 5.预测图片(推理)
 
 经过36轮训练，数据可以达到mAP至0.77+，对于该数据集已经足够。
+
+<span id="jump7.1"></span>
 
 ### 5.1  大规模图片预测
 如果是测试验证集的图片，可以使用`tool/test.py`预测，
@@ -594,6 +633,8 @@ runner = dict(max_epochs=36) #36轮
 测试命令`python tools/test.py configs/swin/mask_rcnn_swin-t-p4-w7_fpn_ms-crop-3x_coco.py archive/latest.pth  --out archive/result.pkl --show-dir archive --show-score-thr 0.5`
 
 各参数依次是：测试脚本名，配置文件路径，模型路径，输出结果路径（BOX和概率信息），测试框好的图片保存路径，置信度（可选，不选默认0.3）
+
+<span id="jump7.2"></span>
 
 ### 5.2  单图片预测
 
@@ -621,7 +662,7 @@ result = inference_detector(model, img) #BOX和概率信息
 imgs =  show_result_pyplot(model, img, result,score_thr =0.5)
 ```
 
-如果只测试，但只需要保存图片至路径时：
+如果只测试单张图片，又只需要保存图片至路径时：
 
 ```python
 out_file = '/data/archive/test.jpg'
@@ -629,6 +670,8 @@ imgs = model.show_result(img, result,score_thr =0.7)
 cv2.imwrite(out_file, imgs)
 ```
 <img src="https://github.com/ethanliuzhuo/mmdetection-in-SVHN/blob/master/img/output.png" width="500px">
+
+<span id="jump7.3"></span>
 
 ### 5.3  视频预测
 
