@@ -1,0 +1,23 @@
+ cape-bd@10.216.6.239 12345678aA12345678aA
+docker restart liuzhuo
+docker exec -it liuzhuo  bash 
+
+service ssh start
+service ssh status
+
+docker exec -it liuzhuo bash
+./tools/dist_train.sh configs/cascade_rcnn/111.py 4 --work-dir ship4
+python tools/train.py configs/cascade_rcnn/222.py --work-dir AOD
+
+python tools/train.py configs/cascade_rcnn/cascade_rcnn_r50_fpn_1x_coco.py --work-dir AOD
+
+echo "deb https://mirrors.ustc.edu.cn/ubuntu/ bionic main restricted universe multiverse" >>/etc/apt/sources.list
+echo "deb https://mirrors.ustc.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse" >>/etc/apt/sources.list
+echo "deb https://mirrors.ustc.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse" >>/etc/apt/sources.list
+echo "deb https://mirrors.ustc.edu.cn/ubuntu/ bionic-security main restricted universe multiverse" >>/etc/apt/sources.list
+echo "deb https://mirrors.ustc.edu.cn/ubuntu/ bionic-proposed main restricted universe multiverse" >>/etc/apt/sources.list
+
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+
+
+ ./tools/dist_train.sh configs/pspnet/111myconfigs.py 4 --work-dir remote --load-from checkpoints/pspnet_r50-d8_769x769_40k_cityscapes_20200606_112725-86638686.pth

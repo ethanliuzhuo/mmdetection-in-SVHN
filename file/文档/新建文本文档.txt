@@ -1,0 +1,41 @@
+docker exec -it 0f530e2ff893 bash
+
+docker run -itd --gpus all --name liuzhuo -p 3103:8000 -p 3301:22 -v /home:/home/cape-bd/liuzhuo mm_retrieval:1.0 /bin/bash
+
+docker exec -it  07e1e7df0076 bash
+docker stop 07e1e7df0076 
+docker restart 07e1e7df0076 
+ docker container stop 4a46ca4c6957 #Í£Ö¹
+docker container rm 4a46ca4c6957 #É¾³ýÈÝÆ÷
+
+docker run -itd --gpus all --name liuzhuo  -p 3301:22 -v /home/cape-bd/liuzhuo:/home a780a9281059 /bin/bash  #Éú³ÉÈÝÆ÷£¬Ó³Éähomeµ½·þÎñÆ÷µÄliuzhuo
+
+
+
+echo "deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic main restricted universe multiverse" >>/etc/apt/sources.list
+echo "deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic main restricted universe multiverse" >>/etc/apt/sources.list
+echo "deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse" >>/etc/apt/sources.list
+echo "deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse" >>/etc/apt/sources.list
+echo "deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse" >>/etc/apt/sources.list
+echo "deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse" >>/etc/apt/sources.list
+echo "deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse" >>/etc/apt/sources.list
+echo "deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse" >>/etc/apt/sources.list
+
+./tools/dist_train.sh configs/pspnet/111myconfigs.py 2 --work-dir VOC --load-from checkpoints/pspnet_r50-d8_512x512_20k_voc12aug_20200617_101958-ed5dfbd9.pth
+python tools/train.py configs/pspnet/111myconfigs.py --work-dir VOC --load-from checkpoints/pspnet_r50-d8_512x1024_40k_cityscapes_20200605_003338-2966598c.pth
+python tools/train.py configs/pspnet/111myconfigs.py --work-dir VOC --load-from checkpoints/pspnet_r50-d8_512x1024_40k_cityscapes_20200605_003338-2966598c.pth
+
+python tools/train.py configs/pspnet/111myconfigs.py --work-dir VOC
+
+./tools/dist_test.sh configs/vfnet/1myconf.py VOC/epoch_4.pth 2 --out data/number/result2.pkl --show-dir data/number/test_image2/
+./tools/dist_train.sh configs/vfnet/1myconf.py 2 --work-dir VOC
+
+python tools/test.py configs/unet/111_my_config.py VOC/iter_2000.pth --out data/house2/result.pkl --show-dir data/house2/perdict --format-only --options "txtfile_prefix=./mask_rcnn_cityscapes_test_results"
+
+
+jupyter notebook --allow-root       123456789                                    
+
+./tools/dist_train.sh configs/pspnet/111_defect.py 2 --work-dir defect --load-from checkpoints/pspnet_r50-d8_512x1024_40k_cityscapes_20200605_003338-2966598c.pth 
+
+./tools/dist_train.sh configs/swin/111.py 2 --work-dir ship7
+./tools/dist_train.sh configs/swin/111.py 2 --work-dir ship8

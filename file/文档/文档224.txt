@@ -1,0 +1,162 @@
+TypeError: loss() missing 1 required positional argument: 'img_metas'
+WARNING:torch.distributed.elastic.multiprocessing.api:Sending process 38819 closing signal SIGTERM
+ERROR:torch.distributed.elastic.multiprocessing.api:failed (exitcode: 1) local_rank: 1 (pid: 38820) of binary: /root/anaconda3/envs/open-mmlab/bin/python
+Traceback (most recent call last):
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/runpy.py", line 194, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/torch/distributed/launch.py", line 193, in <module>
+    main()
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/torch/distributed/launch.py", line 189, in main
+    launch(args)
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/torch/distributed/launch.py", line 174, in launch
+    run(args)
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/torch/distributed/run.py", line 710, in run
+    elastic_launch(
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/torch/distributed/launcher/api.py", line 131, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/torch/distributed/launcher/api.py", line 259, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+./tools/train.py FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2022-03-01_06:46:02
+  host      : 07e1e7df0076
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 38820)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
+(open-mmlab) root@07e1e7df0076:/home/mmdetection# /root/anaconda3/envs/open-mmlab/lib/python3.8/multiprocessing/resource_tracker.py:216: UserWarning: resource_tracker: There appear to be 11 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+
+
+./tools/dist_train.sh ./configs/vfnet/vfnet_r101_fpn_mdconv_c3-c5_mstrain_2x_coco.py 2 --work-dir house 
+ 'sha1:5e1538cf0c49:c0a3327f2ca9b88c5958dd01b5ded69b792cf90a'
+
+
+80:22
+
+
+docker exec -it 49b87169ae21 bash
+
+2.bzts 
+1) 2£©
+
+46, s2.loss_cls: 7.9327, s2.acc: 92.8655, s2.loss_bbox: 66.2230, loss: 1336.5592
+2022-03-08 11:49:58,301 - mmdet - INFO - Exp name: 111.py
+2022-03-08 11:49:58,301 - mmdet - INFO - Epoch [1][1000/4839]	lr: 9.990e-04, eta: 22:36:13, time: 0.279, data_time: 0.005, memory: 7099, loss_rpn_cls: 4679.7259, loss_rpn_bbox: 2298.6009, s0.loss_cls: 713.6752, s0.acc: 64.7050, s0.loss_bbox: 1828.6982, s1.loss_cls: 101.4976, s1.acc: 61.5950, s1.loss_bbox: 1127.2488, s2.loss_cls: 3.1252, s2.acc: 63.5456, s2.loss_bbox: 384.9048, loss: 11137.4763
+2022-03-08 11:50:26,152 - mmdet - INFO - Epoch [1][1100/4839]	lr: 1.000e-03, eta: 21:45:16, time: 0.278, data_time: 0.005, memory: 7407, loss_rpn_cls: 210.0190, loss_rpn_bbox: 559.7324, s0.loss_cls: 0.8375, s0.acc: 59.1490, s0.loss_bbox: 2.6903, s1.loss_cls: 1.3739, s1.acc: 58.8115, s1.loss_bbox: 9.4045, s2.loss_cls: 0.6505, s2.acc: 56.0115, s2.loss_bbox: 1.7908, loss: 786.4990
+Traceback (most recent call last):
+  File "./tools/train.py", line 209, in <module>
+    main()
+  File "./tools/train.py", line 198, in main
+    train_detector(
+  File "/home/mmdetection/mmdet/apis/train.py", line 208, in train_detector
+    runner.run(data_loaders, cfg.workflow)
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/mmcv/runner/epoch_based_runner.py", line 127, in run
+    epoch_runner(data_loaders[i], **kwargs)
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/mmcv/runner/epoch_based_runner.py", line 50, in train
+    self.run_iter(data_batch, train_mode=True, **kwargs)
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/mmcv/runner/epoch_based_runner.py", line 29, in run_iter
+    outputs = self.model.train_step(data_batch, self.optimizer,
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/mmcv/parallel/distributed.py", line 52, in train_step
+    output = self.module.train_step(*inputs[0], **kwargs[0])
+  File "/home/mmdetection/mmdet/models/detectors/base.py", line 249, in train_step
+    loss, log_vars = self._parse_losses(losses)
+  File "/home/mmdetection/mmdet/models/detectors/base.py", line 208, in _parse_losses
+    assert log_var_length == len(log_vars) * dist.get_world_size(), \
+AssertionError: loss log variables are different across GPUs!
+rank 1 len(log_vars): 11 keys: loss_rpn_cls,loss_rpn_bbox,s0.loss_cls,s0.acc,s0.loss_bbox,s1.loss_cls,s1.acc,s1.loss_bbox,s2.loss_cls,s2.acc,s2.loss_bbox
+Traceback (most recent call last):
+  File "./tools/train.py", line 209, in <module>
+    main()
+  File "./tools/train.py", line 198, in main
+    train_detector(
+  File "/home/mmdetection/mmdet/apis/train.py", line 208, in train_detector
+    runner.run(data_loaders, cfg.workflow)
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/mmcv/runner/epoch_based_runner.py", line 127, in run
+    epoch_runner(data_loaders[i], **kwargs)
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/mmcv/runner/epoch_based_runner.py", line 50, in train
+    self.run_iter(data_batch, train_mode=True, **kwargs)
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/mmcv/runner/epoch_based_runner.py", line 29, in run_iter
+    outputs = self.model.train_step(data_batch, self.optimizer,
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/mmcv/parallel/distributed.py", line 52, in train_step
+    output = self.module.train_step(*inputs[0], **kwargs[0])
+  File "/home/mmdetection/mmdet/models/detectors/base.py", line 249, in train_step
+    loss, log_vars = self._parse_losses(losses)
+  File "/home/mmdetection/mmdet/models/detectors/base.py", line 208, in _parse_losses
+    assert log_var_length == len(log_vars) * dist.get_world_size(), \
+AssertionError: loss log variables are different across GPUs!
+rank 0 len(log_vars): 3 keys: loss_rpn_cls,loss_rpn_bbox,s0.loss_bbox
+ERROR:torch.distributed.elastic.multiprocessing.api:failed (exitcode: 1) local_rank: 0 (pid: 79) of binary: /root/anaconda3/envs/open-mmlab/bin/python
+Traceback (most recent call last):
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/runpy.py", line 194, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/torch/distributed/launch.py", line 193, in <module>
+    main()
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/torch/distributed/launch.py", line 189, in main
+    launch(args)
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/torch/distributed/launch.py", line 174, in launch
+    run(args)
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/torch/distributed/run.py", line 710, in run
+    elastic_launch(
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/torch/distributed/launcher/api.py", line 131, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/torch/distributed/launcher/api.py", line 259, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+./tools/train.py FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2022-03-08_11:50:46
+  host      : 07e1e7df0076
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 80)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2022-03-08_11:50:46
+  host      : 07e1e7df0076
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 79)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
+(open-mmlab) root@07e1e7df0076:/home/mmdetection# cape-bd@capebd-service2:~/liuzhuo/mmdetection$ 
+cape-bd@capebd-service2:~/liuzhuo/mmdetection$ 
+cape-bd@capebd-service2:~/liuzhuo/mmdetection$ 
+cape-bd@capebd-service2:~/liuzhuo/mmdetection$ docker exec -it  07e1e7df0076 bash
+(base) root@07e1e7df0076:/# conda activate open-mmlab
+(open-mmlab) root@07e1e7df0076:/# cd home/mmdetection/
+(open-mmlab) root@07e1e7df0076:/home/mmdetection#  ./tools/dist_train.sh configs/swin/111.py 2 --work-dir ship6
+/root/anaconda3/envs/open-mmlab/lib/python3.8/site-packages/torch/distributed/launch.py:178: FutureWarning: The module torch.distributed.launch is deprecated
+and will be removed in future. Use torchrun.
+Note that --use_env is set by default in torchrun.
+If your script expects `--local_rank` argument to be set, please
+change it to read from `os.environ['LOCAL_RANK']` instead. See 
+https://pytorch.org/docs/stable/distributed.html#launch-utility for 
+further instructions
+
+  warnings.warn(
+WARNING:torch.distributed.run:
+*****************************************
+Setting OMP_NUM_THREADS environment variable fo
+
+
+
+
+
